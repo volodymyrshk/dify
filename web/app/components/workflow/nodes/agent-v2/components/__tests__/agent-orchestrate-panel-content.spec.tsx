@@ -490,7 +490,15 @@ describe('Inline Agent configure workspace', () => {
     await waitFor(() => expect(ssePost).toHaveBeenCalledOnce())
     await receive()
     api.loadBuildDraft.mockReturnValue(refreshed.promise)
-    await complete()
+    vi.useFakeTimers()
+    try {
+      await complete()
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(1000)
+      })
+    } finally {
+      vi.useRealTimers()
+    }
     await waitFor(() => expect(api.loadBuildDraft).toHaveBeenCalledTimes(2), { timeout: 2000 })
     await sendBuild(user, 'Improve the reviewer')
     await waitFor(() => expect(ssePost).toHaveBeenCalledTimes(2))
@@ -500,7 +508,15 @@ describe('Inline Agent configure workspace', () => {
     expect(promptEditor()).not.toHaveTextContent('Old completion')
     await receive(1, 'build-conversation', 'Improved reviewer')
     api.loadBuildDraft.mockResolvedValue(createBuildDraft('Improved instructions'))
-    await complete(1)
+    vi.useFakeTimers()
+    try {
+      await complete(1)
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(1000)
+      })
+    } finally {
+      vi.useRealTimers()
+    }
     await waitFor(() => expect(applyButton()).toBeEnabled(), { timeout: 2000 })
   })
 
